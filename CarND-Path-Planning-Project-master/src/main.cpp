@@ -233,11 +233,32 @@ int main() {
               for (int i = 0; i < sensor_fusion.size(); i++) {
                 // Check if the car is in the same lane as the lane which we wish to enter
                 float d = sensor_fusion[i][6];
+                // double check_speed = sensor_fusion[i][4];
+                // check_speed = sqrt(vx*vx + vy*vy);
+                double vx = sensor_fusion[i][3];
+                double vy = sensor_fusion[i][4];
+                double check_speed = sqrt(vx*vx + vy*vy);
+                double check_car_s = sensor_fusion[i][5];
+                if(i == 5){
+
+                  std::cout <<  " MY DATA:";
+                  std::cout <<  ref_vel;
+                  std::cout <<  " \n";
+                  std::cout <<  car_s;
+                  std::cout <<  " \n";
+                  std::cout <<  " SPEED :";
+                  std::cout <<  check_speed;
+                  // std::cout <<  check_speed;
+                  std::cout <<  " \n";
+                  std::cout <<  " CAR S: " ;
+                  std::cout << check_car_s;
+                  // std::cout <<  check_car_s;
+                  std::cout <<  " \n";
+
+                }
+               
                 if (d < (4) && d > (0)){ // car lies in the 0 lane
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
+                 
                   check_car_s += (double)prev_size * 0.02 * check_speed;
 
                   // if the the check car is behind me 
@@ -260,51 +281,56 @@ int main() {
                   }
                   
                 }
-                else if (d < (8) && d > (4)){ // lane 1 (middle)
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
+                else if (d < (8) && d > (4)){ // car lies in the 1 lane
+                 
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
+
+                  // if the the check car is behind me 
+                  // and its speed is not faster than mine
+                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front  && check_speed < ref_vel ){
+                    // if the car is in front of us and within 30 meters then we know that there is no point in making a lane change
                     bool can_1 = false;
                   } 
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back && check_speed > ref_vel){ // car is behind us and too close
+                    std::cout << "Found that there is a car behind us in lane \n";
                     bool can_1 = false;
                   }
                   else{
-                    if(dist_1 < (car_s - check_car_s)){
+                    if(dist_1> (car_s - check_car_s)){
                       dist_1 = (car_s - check_car_s);
                     }
-                    else if (dist_1 < (check_car_s - car_s)){
+                    else if (dist_1 > (check_car_s - car_s)){
                       dist_1 = (check_car_s - car_s);
                     }
                   }
+                  
                 }
-                else if (d < (12) && d > (8)){ // rightmost lane 2
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
-          
+                else if (d < (12) && d > (8)){ // car lies in the 2 lane
+                 
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
+
+                  // if the the check car is behind me 
+                  // and its speed is not faster than mine
+                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front  && check_speed < ref_vel ){
+                    // if the car is in front of us and within 30 meters then we know that there is no point in making a lane change
                     bool can_2 = false;
-                  }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
+                  } 
+                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back && check_speed > ref_vel){ // car is behind us and too close
+                    std::cout << "Found that there is a car behind us in lane \n";
                     bool can_2 = false;
                   }
                   else{
-                    if(dist_2 < (car_s - check_car_s)){
+                    if(dist_2 > (car_s - check_car_s)){
                       dist_2 = (car_s - check_car_s);
                     }
-                    else if (dist_2 < (check_car_s - car_s)){
+                    else if (dist_2> (check_car_s - car_s)){
                       dist_2 = (check_car_s - car_s);
                     }
                   }
                 }
+                
               }
-
+                
               if(lane == 0){ // left lane
                 if(!can_1){ // if we cant go to the left lane
                     
