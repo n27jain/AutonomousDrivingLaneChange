@@ -14,7 +14,6 @@ using nlohmann::json;
 using std::string;
 using std::vector;
 
-
 int main() {
   uWS::Hub h;
 
@@ -96,7 +95,11 @@ int main() {
           auto sensor_fusion = j[1]["sensor_fusion"];
 
           json msgJson;
-      
+
+          /**
+           * The given code defines a path made up of (x,y) points that the car
+           *   will visit sequentially every .02 seconds
+           */
 
           int prev_size = previous_path_x.size();
           
@@ -105,7 +108,7 @@ int main() {
           }
         
           bool too_close = false; // True if too close to a car in front
-          double interestCarSpeed = 0;
+          double get_carspeed = 0;
           // Find ref_v to use
           for (int i = 0; i < sensor_fusion.size(); i++) {
             // Check if the car is in the same lane as the ego vehicle
@@ -114,29 +117,28 @@ int main() {
               double vx = sensor_fusion[i][3];
               double vy = sensor_fusion[i][4];
               double check_speed = sqrt(vx*vx + vy*vy);
-              interestCarSpeed = check_speed;
+              get_carspeed = check_speed;
               double check_car_s = sensor_fusion[i][5];
-              
               // Calculate the check_car's future location
               check_car_s += (double)prev_size * 0.02 * check_speed;
               // If the check_car is within 30 meters in front, reduce ref_vel so that we don't hit it
               if (check_car_s > car_s && (check_car_s - car_s) < 20){
                 //ref_vel = 29.5;
                 too_close = true;
-              } 
+              }
             }
           }
-        
+
           // Create a list of evenly spaced waypoints 30m apart
           // Interpolate those waypoints later with spline and fill it in with more points
           vector<double> ptsx;
           vector<double> ptsy;
-        
+
           // Reference x, y, yaw states, either will be the starting point or end point of the previous path
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);
-        
+
           // if previous size is almost empty, use the car as starting reference
           if (prev_size < 2) {
             // Use two points that make the path tangent to the car
@@ -160,7 +162,7 @@ int main() {
             ptsy.push_back(ref_y_prev);
             ptsy.push_back(ref_y);
           }
-        
+
           // Add evenly 30m spaced points ahead of the starting reference
           vector<double> next_wp0 = getXY(car_s+30, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
           vector<double> next_wp1 = getXY(car_s+60, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
@@ -171,7 +173,7 @@ int main() {
           ptsy.push_back(next_wp0[1]);
           ptsy.push_back(next_wp1[1]);
           ptsy.push_back(next_wp2[1]);
-        
+
           for (int i = 0; i < ptsx.size(); i++) {
             // shift car reference angle to 0 degrees
             double shift_x = ptsx[i]-ref_x;
@@ -179,12 +181,12 @@ int main() {
             ptsx[i] = shift_x * cos(0-ref_yaw) - shift_y * sin(0-ref_yaw);
             ptsy[i] = shift_x * sin(0-ref_yaw) + shift_y * cos(0-ref_yaw);
           }
-        
+
           // Create a spline
           tk::spline s;
           // Set (x,y) points to the spline (i.e. fits a spline to those points)
           s.set_points(ptsx, ptsy);
-          
+
           // Define the actual (x,y) points we will use for the planner
           vector<double> next_x_vals;
           vector<double> next_y_vals;
@@ -199,56 +201,56 @@ int main() {
           double target_y = s(target_x);
           double target_dist = sqrt(target_x*target_x + target_y*target_y); // this is the d in the diagram
           double x_add_on = 0.0; // Related to the transformation (starting at zero)
-          
-          
-          
-          
-          /// CODE START
-          
-          
-          
+
+
+
+
+          /// TODO
+
+
+
           // Fill up the rest of path planner after filling it with previous points, will always output 50 points
-          int gap_front  = 10;
-          int gap_back = 20;
-          bool isLaneChanging = false;
+          int front_gap  = 10;
+          int rear_gap = 20;
+          bool lane_change = false;
           for (int i = 1; i <= 50-previous_path_x.size(); i++) {
             // Reduce speed if too close, add if no longer close
-
             if (too_close) {
-              // ref_vel -= .224;
+//                ref_vel -= .224;
+//            } else if (ref_vel < 49.5) {
+//              ref_vel += .224;
 
-
-              if(ref_vel > interestCarSpeed ){
+              if(ref_vel > get_carspeed ){
                  ref_vel -= .224;
               }
-              
-              bool can_0 = true;
-              bool can_1 = true;
-              bool can_2 = true;
               int dist_0 = 100 ;
               int dist_1 = 100 ;
               int dist_2 = 100 ;
+              bool left_lane = true;
+              bool middle_lane = true;
+              bool right_lane = true;
+
 
               // Find ref_v to use
               for (int i = 0; i < sensor_fusion.size(); i++) {
                 // Check if the car is in the same lane as the lane which we wish to enter
-                float d = sensor_fusion[i][6];
-                if (d < (4) && d > (0)){ // car lies in the 0 lane
+                float lane_check = sensor_fusion[i][6];
+                if (lane_check < (4) && lane_check > (0)){ // car lies in the left lane
                   double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
+//
+                  double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
                   check_car_s += (double)prev_size * 0.02 * check_speed;
 
-                  // if the the check car is behind me 
+                  // if the the check car is behind me
                   // and its speed is not faster than mine
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front  && check_speed < ref_vel ){
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap  && check_speed < ref_vel ){
                     // if the car is in front of us and within 30 meters then we know that there is no point in making a lane change
-                    bool can_0 = false;
-                  } 
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back && check_speed > ref_vel){ // car is behind us and too close
+                    bool left_lane = false;
+                  }
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us and too close
                     std::cout << "Found that there is a car behind us in lane \n";
-                    bool can_0 = false;
+                    bool left_lane = false;
                   }
                   else{
                     if(dist_0 > (car_s - check_car_s)){
@@ -258,19 +260,17 @@ int main() {
                       dist_0 = (check_car_s - car_s);
                     }
                   }
-                  
                 }
-                else if (d < (8) && d > (4)){ // lane 1 (middle)
+                else if (d < (8) && d > (4)){ // middle lane
                   double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
+                  double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
-                    bool can_1 = false;
-                  } 
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
-                    bool can_1 = false;
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                    bool middle_lane = false;
+                  }
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us and too close
+                    bool middle_lane = false;
                   }
                   else{
                     if(dist_1 < (car_s - check_car_s)){
@@ -283,16 +283,15 @@ int main() {
                 }
                 else if (d < (12) && d > (8)){ // rightmost lane 2
                   double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
+                  double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
-          
+
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
-                    bool can_2 = false;
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                    bool right_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
-                    bool can_2 = false;
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us and too close
+                    bool right_lane = false;
                   }
                   else{
                     if(dist_2 < (car_s - check_car_s)){
@@ -306,18 +305,17 @@ int main() {
               }
 
               if(lane == 0){ // left lane
-                if(!can_1){ // if we cant go to the left lane
-                    
+                if(!middle_lane){ // if we cant go to the left lane
+
                 }
                 else{
                   lane = 1;
                 }
               }
               else if(lane == 1){ // middle lane
-                if(!can_0 && !can_2){ // if we cant go to either lanes
-      
+                if(!left_lane && !right_lane){ // if we cant go to either lanes
                 }
-                else if (can_0 && can_2){// both are viable 
+                else if (left_lane && right_lane){// both are viable
                   if(dist_0 > dist_2){
                     lane = 0;
                   }
@@ -325,59 +323,21 @@ int main() {
                     lane = 2;
                   }
                 }
-                else if(can_2){
+                else if(right_lane){
                   lane = 2;
                 }
-                else if(can_0){
+                else if(left_lane){
                   lane = 0;
                 }
-                
               }
               else if (lane == 2){ //right lane
-                if(!can_1){ // if we cant go to either lanes
-                 
+                if(!middle_lane){ // if we cant go to either lanes
                 }
                 else{
                   lane = 1;
                 }
               }
-
-                
-               // CODE END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              // switch (lane){
-              //    case 0:
-              //     lane = 1;
-              //     break;
-              //     case 1:
-              //       lane = 2;
-              //       break;
-              //     case 2:
-              //       lane = 1;
-              //       break;
-              // }
-               
-              // ref_vel -= .224;
-
             } else if (ref_vel < 49.5 ){
-
               ref_vel += .224;
             }
             double N = (target_dist/(0.02*ref_vel/2.24));
