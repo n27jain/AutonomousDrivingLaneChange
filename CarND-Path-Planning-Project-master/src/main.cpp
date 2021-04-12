@@ -213,13 +213,15 @@ int main() {
           bool isLaneChanging = false;
           for (int i = 1; i <= 50-previous_path_x.size(); i++) {
             // Reduce speed if too close, add if no longer close
-
+            if(ref_vel > 49.5){
+                 ref_vel -= .100;
+            }
             if (too_close) {
               // ref_vel -= .224;
 
 
               if(ref_vel > interestCarSpeed ){
-                 ref_vel -= .224;
+                 ref_vel -= .100;
               }
               
               bool can_0 = true;
@@ -239,7 +241,7 @@ int main() {
                 double vy = sensor_fusion[i][4];
                 double check_speed = sqrt(vx*vx + vy*vy);
                 double check_car_s = sensor_fusion[i][5];
-                if(i == 5){
+                if(i == 5 && (d < (4) && d > (0))){
 
                   std::cout <<  " MY DATA:";
                   std::cout <<  ref_vel;
@@ -344,13 +346,13 @@ int main() {
       
                 }
                 else if (can_0 && can_2){// both are viable 
-                  if(dist_0 > dist_2){
+                  if(dist_0 < dist_2){
                     lane = 0;
                   }
                   else {
                     lane = 2;
                   }
-                }
+                } 
                 else if(can_2){
                   lane = 2;
                 }
