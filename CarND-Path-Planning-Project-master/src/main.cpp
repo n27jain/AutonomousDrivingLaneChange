@@ -236,13 +236,19 @@ int main() {
                   check_car_s += (double)prev_size * 0.02 * check_speed;
 
                   // check car behind me and see if its speed
-                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap  && check_speed < ref_vel ){
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap ){
                     // check car in front and see if it is has good distnace
-                    bool left_lane = false;
+                    if (check_speed< ref_vel){
+                        bool left_lane = false;
+                    }
+
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us is too close
-                    std::cout << "Found that there is a car behind us in lane \n";
-                    bool left_lane = false;
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
+                    if (check_speed > ref_vel){
+                        std::cout << "Found that there is a car behind us in lane \n";
+                        bool left_lane = false;
+                    }
+
                   }
                   else{
                     if(dist_1 > (car_s - check_car_s)  && (car_s - check_car_s) >= 0){
@@ -258,11 +264,16 @@ int main() {
                   double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap && check_speed < ref_vel){
-                    bool middle_lane = false;
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                    if (check_speed < ref_vel){
+                        bool middle_lane = false;
+                    }
+
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel ){ // car is behind us is too close
-                    bool middle_lane = false;
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
+                    if (check_speed > ref_vel){
+                        bool middle_lane = false;
+                    }
                   }
                 }
                 else if (lane_check < (12) && lane_check > (8)){ // rightmost lane
@@ -271,11 +282,16 @@ int main() {
                   double check_car_s = sensor_fusion[i][5];
 
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap && check_speed < ref_vel){
-                    bool right_lane = false;
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                    if (check_speed < ref_vel){
+                        bool middle_lane = false;
+                    }
+
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us is too close
-                    bool right_lane = false;
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
+                    if (check_speed > ref_vel){
+                        bool middle_lane = false;
+                    }
                   }
                   else{
                     if(dist_2 > (car_s - check_car_s) && (car_s - check_car_s) >= 0){
