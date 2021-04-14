@@ -212,18 +212,13 @@ int main() {
           // Fill up the rest of path planner after filling it with previous points, will always output 50 points
           int front_gap  = 10;
           int rear_gap = 20;
-          bool lane_change = false;
+//          bool lane_change = false;
           for (int i = 1; i <= 50-previous_path_x.size(); i++) {
             // Reduce speed if too close, add if no longer close
             if (too_close) {
-//                ref_vel -= .224;
-//            } else if (ref_vel < 49.5) {
-//              ref_vel += .224;
-
               if(ref_vel > get_carspeed ){
                  ref_vel -= .224;
               }
-              int dist_0 = 100 ;
               int dist_1 = 100 ;
               int dist_2 = 100 ;
               bool left_lane = true;
@@ -253,11 +248,11 @@ int main() {
                     bool left_lane = false;
                   }
                   else{
-                    if(dist_0 > (car_s - check_car_s)){
-                      dist_0 = (car_s - check_car_s);
+                    if(dist_1 > (car_s - check_car_s)){
+                      dist_1 = (car_s - check_car_s);
                     }
-                    else if (dist_0 > (check_car_s - car_s)){
-                      dist_0 = (check_car_s - car_s);
+                    else if (dist_1 > (check_car_s - car_s)){
+                      dist_1 = (check_car_s - car_s);
                     }
                   }
                 }
@@ -272,14 +267,7 @@ int main() {
                   else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us and too close
                     bool middle_lane = false;
                   }
-                  else{
-                    if(dist_1 < (car_s - check_car_s)){
-                      dist_1 = (car_s - check_car_s);
-                    }
-                    else if (dist_1 < (check_car_s - car_s)){
-                      dist_1 = (check_car_s - car_s);
-                    }
-                  }
+              
                 }
                 else if (d < (12) && d > (8)){ // rightmost lane 2
                   double vx = sensor_fusion[i][3];
@@ -316,7 +304,7 @@ int main() {
                 if(!left_lane && !right_lane){ // if we cant go to either lanes
                 }
                 else if (left_lane && right_lane){// both are viable
-                  if(dist_0 > dist_2){
+                  if(dist_1 > dist_2){
                     lane = 0;
                   }
                   else {
