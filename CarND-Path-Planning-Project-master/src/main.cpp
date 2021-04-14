@@ -219,31 +219,27 @@ int main() {
               if(ref_vel > get_carspeed ){
                  ref_vel -= .224;
               }
-              int dist_1 = 100 ;
-              int dist_2 = 100 ;
+              int dist_1 = 9999; // these values are the distance between the cars
+              int dist_2 = 9999; // these values are the distance between the cars
               bool left_lane = true;
               bool middle_lane = true;
               bool right_lane = true;
 
-
-              // Find ref_v to use
               for (int i = 0; i < sensor_fusion.size(); i++) {
-                // Check if the car is in the same lane as the lane which we wish to enter
+                // check car lane it is in
                 float lane_check = sensor_fusion[i][6];
                 if (lane_check < (4) && lane_check > (0)){ // car lies in the left lane
                   double vx = sensor_fusion[i][3];
-//
                   double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
                   check_car_s += (double)prev_size * 0.02 * check_speed;
 
-                  // if the the check car is behind me
-                  // and its speed is not faster than mine
+                  // check car behind me and see if its speed
                   if (check_car_s > car_s && (check_car_s - car_s) < front_gap  && check_speed < ref_vel ){
-                    // if the car is in front of us and within 30 meters then we know that there is no point in making a lane change
+                    // check car in front and see if it is has good distnace
                     bool left_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us is too close
                     std::cout << "Found that there is a car behind us in lane \n";
                     bool left_lane = false;
                   }
@@ -264,12 +260,11 @@ int main() {
                   if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
                     bool middle_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
                     bool middle_lane = false;
                   }
-              
                 }
-                else if (d < (12) && d > (8)){ // rightmost lane 2
+                else if (d < (12) && d > (8)){ // rightmost lane
                   double vx = sensor_fusion[i][3];
                   double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
@@ -278,7 +273,7 @@ int main() {
                   if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
                     bool right_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
                     bool right_lane = false;
                   }
                   else{
@@ -293,7 +288,7 @@ int main() {
               }
 
               if(lane == 0){ // left lane
-                if(!middle_lane){ // if we cant go to the left lane
+                if(!middle_lane){ // incase we cannot go to left lane
 
                 }
                 else{
@@ -301,9 +296,9 @@ int main() {
                 }
               }
               else if(lane == 1){ // middle lane
-                if(!left_lane && !right_lane){ // if we cant go to either lanes
+                if(!left_lane && !right_lane){ // incase if we cannot go to any lane
                 }
-                else if (left_lane && right_lane){// both are viable
+                else if (left_lane && right_lane){ //both left and right lanes are possible
                   if(dist_1 > dist_2){
                     lane = 0;
                   }
@@ -319,7 +314,7 @@ int main() {
                 }
               }
               else if (lane == 2){ //right lane
-                if(!middle_lane){ // if we cant go to either lanes
+                if(!middle_lane){ // incase if we cannot go to any lane
                 }
                 else{
                   lane = 1;
