@@ -225,21 +225,21 @@ int main() {
               bool can_0 = true;
               bool can_1 = true;
               bool can_2 = true;
-              int dist_0 = 100 ;
-              int dist_1 = 100 ;
-              int dist_2 = 100 ;
+              int dist_0 = 10000 ;
+              int dist_1 = 10000 ;
+              int dist_2 = 10000 ;
 
               // Find ref_v to use
               for (int i = 0; i < sensor_fusion.size(); i++) {
                 // Check if the car is in the same lane as the lane which we wish to enter
                 float d = sensor_fusion[i][6];
-                if (d < (4) && d > (0)){ // car lies in the 0 lane
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
-                  check_car_s += (double)prev_size * 0.02 * check_speed;
+                double vx = sensor_fusion[i][3];
+                double vy = sensor_fusion[i][4];
+                double check_speed = (vy);
+                double check_car_s = sensor_fusion[i][5];
+                check_car_s += (double)prev_size * 0.02 * check_speed;
 
+                if (d < (4) && d > (0)){ // car lies in the 0 lane
                   // if the the check car is behind me 
                   // and its speed is not faster than mine
                   if (check_car_s > car_s && (check_car_s - car_s) < gap_front  && check_speed < ref_vel ){
@@ -261,15 +261,10 @@ int main() {
                   
                 }
                 else if (d < (8) && d > (4)){ // lane 1 (middle)
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
-                  check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
+                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front && check_speed < ref_vel){
                     bool can_1 = false;
                   } 
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back && check_speed > ref_vel){ // car is behind us and too close
                     bool can_1 = false;
                   }
                   else{
@@ -282,16 +277,10 @@ int main() {
                   }
                 }
                 else if (d < (12) && d > (8)){ // rightmost lane 2
-                  double vx = sensor_fusion[i][3];
-                  double vy = sensor_fusion[i][4];
-                  double check_speed = (vy);
-                  double check_car_s = sensor_fusion[i][5];
-          
-                  check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front){
+                  if (check_car_s > car_s && (check_car_s - car_s) < gap_front && check_speed < ref_vel){
                     bool can_2 = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back){ // car is behind us and too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < gap_back && check_speed > ref_vel){ // car is behind us and too close
                     bool can_2 = false;
                   }
                   else{
@@ -344,37 +333,6 @@ int main() {
 
                 
                // CODE END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              // switch (lane){
-              //    case 0:
-              //     lane = 1;
-              //     break;
-              //     case 1:
-              //       lane = 2;
-              //       break;
-              //     case 2:
-              //       lane = 1;
-              //       break;
-              // }
-               
-              // ref_vel -= .224;
 
             } else if (ref_vel < 49.5 ){
 
