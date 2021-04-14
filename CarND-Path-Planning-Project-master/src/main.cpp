@@ -226,6 +226,7 @@ int main() {
               bool right_lane = true;
 
               for (int i = 0; i < sensor_fusion.size(); i++) {
+                
                 // check car lane it is in
                 float lane_check = sensor_fusion[i][6];
                 if (lane_check < (4) && lane_check > (0)){ // car lies in the left lane
@@ -244,43 +245,43 @@ int main() {
                     bool left_lane = false;
                   }
                   else{
-                    if(dist_1 > (car_s - check_car_s)){
+                    if(dist_1 > (car_s - check_car_s)  && (car_s - check_car_s) >= 0){
                       dist_1 = (car_s - check_car_s);
                     }
-                    else if (dist_1 > (check_car_s - car_s)){
+                    else if (dist_1 > (check_car_s - car_s) && (check_car_s - car_s) >= 0 ){
                       dist_1 = (check_car_s - car_s);
                     }
                   }
                 }
-                else if (d < (8) && d > (4)){ // middle lane
+                else if (lane_check< (8) && lane_check > (4)){ // middle lane
                   double vx = sensor_fusion[i][3];
                   double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap && check_speed < ref_vel){
                     bool middle_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel ){ // car is behind us is too close
                     bool middle_lane = false;
                   }
                 }
-                else if (d < (12) && d > (8)){ // rightmost lane
+                else if (lane_check < (12) && lane_check > (8)){ // rightmost lane
                   double vx = sensor_fusion[i][3];
                   double check_speed = (sensor_fusion[i][4]);
                   double check_car_s = sensor_fusion[i][5];
 
                   check_car_s += (double)prev_size * 0.02 * check_speed;
-                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap){
+                  if (check_car_s > car_s && (check_car_s - car_s) < front_gap && check_speed < ref_vel){
                     bool right_lane = false;
                   }
-                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap){ // car is behind us is too close
+                  else if(check_car_s < car_s && (car_s - check_car_s) < rear_gap && check_speed > ref_vel){ // car is behind us is too close
                     bool right_lane = false;
                   }
                   else{
-                    if(dist_2 < (car_s - check_car_s)){
+                    if(dist_2 > (car_s - check_car_s) && (car_s - check_car_s) >= 0){
                       dist_2 = (car_s - check_car_s);
                     }
-                    else if (dist_2 < (check_car_s - car_s)){
+                    else if (dist_2 > (check_car_s - car_s) && (check_car_s - car_s) >= 0 ){
                       dist_2 = (check_car_s - car_s);
                     }
                   }
@@ -288,35 +289,30 @@ int main() {
               }
 
               if(lane == 0){ // left lane
-                if(!middle_lane){ // incase we cannot go to left lane
-
-                }
-                else{
+                if(middle_lane){
                   lane = 1;
                 }
               }
               else if(lane == 1){ // middle lane
-                if(!left_lane && !right_lane){ // incase if we cannot go to any lane
-                }
-                else if (left_lane && right_lane){ //both left and right lanes are possible
-                  if(dist_1 > dist_2){
-                    lane = 0;
+                if(left_lane || right_lane){ // incase if we cannot go to any lane
+                  if (left_lane && right_lane){ //both left and right lanes are possible
+                    if(dist_1 > dist_2){
+                      lane = 0;
+                    }
+                    else {
+                      lane = 2;
+                    }
                   }
-                  else {
+                  else if(right_lane){
                     lane = 2;
                   }
-                }
-                else if(right_lane){
-                  lane = 2;
-                }
-                else if(left_lane){
-                  lane = 0;
+                  else if(left_lane){
+                    lane = 0;
+                  }
                 }
               }
               else if (lane == 2){ //right lane
-                if(!middle_lane){ // incase if we cannot go to any lane
-                }
-                else{
+                if(middle_lane){ // incase if we cannot go to any lane
                   lane = 1;
                 }
               }
